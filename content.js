@@ -23,7 +23,7 @@ window.addEventListener("load", function(e){
 	})
 });
 
-function dispatchScrollPosition(e){
+const dispatchScrollPosition =(e) => {
 	let scrollPosition = document.body.scrollTop || document.documentElement.scrollTop;
 	let url = window.location.href; 
 	console.log(e.type);
@@ -35,7 +35,6 @@ function dispatchScrollPosition(e){
 }
 
 document.addEventListener("scroll", dispatchScrollPosition);
-
 
 const scrollToBookmark = (bookmark) => {
 	let scrollPosition = document.body.scrollTop || document.documentElement.scrollTop;
