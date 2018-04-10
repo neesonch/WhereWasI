@@ -1,5 +1,5 @@
 // STATUS: Can toggle BM via icon; toggling icon off deletes entry for current URL (test tab switching)
-// TODOS: Debounce scrolling to resolve error? Unload approach not workable (scrolling seems to be working now that reference to function is passed in instead of deifing the function inline) -- Sanitize urls to remove parameters when saving/retrieving -- Examine bug, scroll events not firing when changing tabs (have to refresh tab for scroll events to work - may have just been test steps issue) -- Enable/disable bookmark tracking on click of icon
+// TODOS:  -- Sanitize urls to remove parameters when saving/retrieving -- Examine bug, scroll events not firing when changing tabs (have to refresh tab for scroll events to work - may have just been test steps issue) -- On new page, BM not toggling to active on first click
 // BACKLOG: Add popup UI to view currently tracked bookmarks
 
 const GREY_ICON_PATH = "assets/icons/bm_grey.png";
@@ -28,11 +28,10 @@ chrome.runtime.onMessage.addListener(
 					chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
 						const activeTab = tabs[0];
 						currentPageData = item[url];
-						bookmarkingActive = currentPageData.bookmarkEnabled;
+						bookmarkingActive = true;
+						setIcon(activeTab.id, BLUE_ICON_PATH);
 						const message = {"message": "bookmark_found", "bookmarkAt": currentPageData.scrollPosition};
 						chrome.tabs.sendMessage(activeTab.id, message, responseHandler);
-						const iconPath = currentPageData.bookmarkEnabled ? BLUE_ICON_PATH : GREY_ICON_PATH;
-						setIcon(activeTab.id, iconPath);
 					});
 				}
 			});
@@ -59,7 +58,7 @@ setIcon = (tabId, iconPath) => {
 
 saveBookmark = (url, scrollPosition) => {
 	let objectToSave = {};
-	objectToSave[url] = {"scrollPosition": scrollPosition, "bookmarkEnabled": true, "url": url};
+	objectToSave[url] = {"scrollPosition": scrollPosition, "url": url};
 	console.log(objectToSave);	//DEBUG
 	chrome.storage.sync.set(objectToSave, function(){
 		console.log(`Bookmark for ${url} at ${scrollPosition} saved!`);
@@ -74,16 +73,16 @@ removeBookmark = (url) => {
 }
 
 toggleBookmark = (activeTab) => {
-	console.log(currentPageData);
-	if(Object.keys(currentPageData).length > 0){
-		const url = currentPageData.url;
+	console.log(currentPageData)	//DEBUG
+	if(bookmarkingActive){
 		console.log(currentPageData);
-		if(currentPageData.bookmarkEnabled){
-			removeBookmark(url);
-			bookmarkingActive = false;
-			setIcon(activeTab.id, GREY_ICON_PATH);
+		if(currentPageData.url){
+			removeBookmark(currentPageData.url);
 		} 
+		bookmarkingActive = false;
+		setIcon(activeTab.id, GREY_ICON_PATH);
 	} else{
+		console.log('Bookmarking enabled');
 		bookmarkingActive = true;
 		setIcon(activeTab.id, BLUE_ICON_PATH);
 	}

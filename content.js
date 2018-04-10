@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener(
 			console.log("Icon clicked!");
 			sendResponse({"url": url});
 		} else if(request.message === "bookmark_found"){
-			console.log(request.bookmarkAt)
+			console.log("Bookmark found at " + request.bookmarkAt)
 			scrollToBookmark(request.bookmarkAt);
 		} else{
 			console.log("Message received:" + request.message);
